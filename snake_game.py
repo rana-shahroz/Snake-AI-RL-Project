@@ -6,6 +6,13 @@ from collections import namedtuple
 pygame.init()
 font = pygame.font.Font('ARI.ttf', 25)
 
+# reset 
+# reward
+# play(action) -> direction
+# game_iteration
+# is_collision
+
+
 class Direction(Enum):
 	RIGHT = 1
 	LEFT = 2
@@ -24,7 +31,7 @@ BLUE1 = (0,0,255)
 BLUE2 = (0,100,255)
 
 
-class SnakeGame:
+class SnakeGameAI:
 
 	def __init__(self, w = 640, h = 480):
 		self.w = w
@@ -33,8 +40,10 @@ class SnakeGame:
 		self.display = pygame.display.set_mode((self.w, self.h))
 		pygame.display.set_caption('Snake')
 		self.clock = pygame.time.Clock()
+		self.reset()
 
-		# init game state
+	def reset(self):
+		# Initizaling Game State
 		self.direction = Direction.RIGHT
 
 		self.head = Point(self.w/2, self.h/2)
@@ -43,6 +52,7 @@ class SnakeGame:
 		self.score = 0
 		self.food = None
 		self._place_food()
+		self.frame_iteration = 0
 
 	def _place_food(self):
 		x = random.randint(0, (self.w - BLOCK_SIZE)//BLOCK_SIZE ) * BLOCK_SIZE
@@ -51,31 +61,19 @@ class SnakeGame:
 		if self.food in self.snake:
 			self._place_food()
 		
-	def play_step(self):
+	def play_step(self, action):
 		# 1. Collect the user input
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				quit()
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_LEFT:
-					self.direction = Direction.LEFT
-
-				elif event.key == pygame.K_RIGHT:
-					self.direction = Direction.RIGHT
-
-				elif event.key == pygame.K_UP:
-					self.direction = Direction.UP
-
-				elif event.key == pygame.K_DOWN:
-					self.direction = Direction.DOWN
-
-
+			
 		# 2 move
-		self._move(self.direction) # update the head.
+		self._move(action) # update the head.
 		self.snake.insert(0, self.head)
 
 		# 3 check if game over
+		rewarad = 0.0
 		game_over = False
 		if self._is_collision():
 			game_over = True
@@ -124,7 +122,7 @@ class SnakeGame:
 		self.display.blit(text, [0, 0])
 		pygame.display.flip()
 
-	def _move(self, direction):
+	def _move(self, action):
 		x = self.head.x
 		y = self.head.y
 		if direction == Direction.RIGHT:
